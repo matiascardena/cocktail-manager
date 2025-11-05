@@ -12,7 +12,6 @@
 /* =========================
    Barra de acciones / Header
 ========================= */
-
 .action-bar {
   display: flex;
   flex-wrap: wrap;
@@ -47,6 +46,17 @@ button[mat-stroked-button] {
   flex: 0 0 20%; /* Ocupa 20% del contenedor */
   min-width: 120px;
   max-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -20px; /* Ajuste para alineación vertical */
+}
+
+button[mat-raised-button] {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================
@@ -72,7 +82,7 @@ button[mat-stroked-button] {
 ========================= */
 .cocktail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(calc(20% - 1rem),1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(20% - 1rem), 1fr));
   gap: 1rem;
 }
 
@@ -156,23 +166,49 @@ mat-card-image {
   margin-bottom: 0.5rem;
 }
 
-button[mat-stroked-button] {
-  flex: 0 0 20%;
-  min-width: 120px;
-  max-width: 180px;
-  margin-top: -20px;
+/* =========================
+   Responsive para móviles
+========================= */
+@media (max-width: 768px) {
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-  /* Ajuste para alineación vertical */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .search-bar {
+    display: flex;
+    flex-direction: row; /* Input y botón en la misma fila */
+    align-items: center; /* Alineación vertical centrada */
+    gap: 0.5rem;
+    flex-wrap: wrap; /* Permite que el botón baje si no cabe */
+  }
 
-button[mat-raised-button] {
-  margin-top: 10px;
+  .search-input {
+    flex: 1 1 auto;
+    min-width: 0; /* Ajusta al espacio disponible */
+  }
 
-  /* Ajuste para alineación vertical */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  button[type="submit"] {
+    flex: 0 0 auto;
+    margin-top: 0; /* Quitar margen extra */
+  }
+
+  button[mat-stroked-button] {
+    width: 100%;
+    margin-top: 0.5rem; /* Separación de la barra de búsqueda */
+  }
+
+  .help-text {
+    flex-basis: 100%; /* Texto de ayuda debajo del input */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .cocktail-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  mat-card-image {
+    height: 140px;
+  }
 }

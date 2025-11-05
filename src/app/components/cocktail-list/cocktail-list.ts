@@ -188,15 +188,20 @@ export class CocktailListComponent implements OnInit {
   get helpText(): string {
     switch (this.searchType) {
       case 'name':
-        return 'Ingresa el nombre del cóctel (máx. 50 caracteres).';
+        return 'Máx. 50 caracteres.';
       case 'id':
-        return 'Ingresa el ID del cóctel (solo números).';
+        return 'Solo números.';
       case 'ingredient':
-        return 'Ingresa un ingrediente para buscar cócteles que lo contengan (máx. 50 caracteres).';
+        return 'Máx. 50 caracteres.';
       default:
         return '';
     }
   }
 
   searchType: 'name' | 'id' | 'ingredient' = 'name';
+
+  onSearchTypeChange(newType: 'name'| 'id' | 'ingredient'){
+    this.query='';
+    this.searchType=newType;
+    }
 }

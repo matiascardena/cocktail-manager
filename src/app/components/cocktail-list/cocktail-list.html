@@ -9,7 +9,7 @@
   <div class="action-bar">
     <mat-form-field appearance="outline" class="search-type-select" *ngIf="!showFavorites">
       <mat-label>Buscar por</mat-label>
-      <mat-select [(ngModel)]="searchType" name="searchType">
+      <mat-select [(ngModel)]="searchType" name="searchType" (ngModelChange)="onSearchTypeChange($event)">
         <mat-option value="name">Nombre</mat-option>
         <mat-option value="id">ID</mat-option>
         <mat-option value="ingredient">Ingrediente</mat-option>
