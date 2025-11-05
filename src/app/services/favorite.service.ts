@@ -8,7 +8,10 @@ import { Cocktail } from '../models/cocktail.model';
 export class FavoriteService {
   private readonly STORAGE_KEY = 'favorites';
   private favorites: Cocktail[] = [];
+
+  // Observables para count y lista
   private favoritesCount$ = new BehaviorSubject<number>(0);
+  private favorites$ = new BehaviorSubject<Cocktail[]>([]);
 
   constructor() {
     this.loadFavorites();
@@ -18,15 +21,25 @@ export class FavoriteService {
     const data = localStorage.getItem(this.STORAGE_KEY);
     this.favorites = data ? JSON.parse(data) : [];
     this.favoritesCount$.next(this.favorites.length);
+    this.favorites$.next([...this.favorites]);
   }
 
   private saveFavorites(): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.favorites));
     this.favoritesCount$.next(this.favorites.length);
+    this.favorites$.next([...this.favorites]);
   }
 
   getFavorites(): Cocktail[] {
     return [...this.favorites];
+  }
+
+  getFavorites$() {
+    return this.favorites$.asObservable();
+  }
+
+  getFavoritesCount$() {
+    return this.favoritesCount$.asObservable();
   }
 
   isFavorite(idDrink: string): boolean {
@@ -44,9 +57,5 @@ export class FavoriteService {
       this.saveFavorites();
       return true;
     }
-  }
-
-  getFavoritesCount$() {
-    return this.favoritesCount$.asObservable();
   }
 }

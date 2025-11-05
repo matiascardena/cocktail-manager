@@ -26,28 +26,22 @@ export class CocktailService {
     return this.getDrinks(url);
   }
 
-  getById(id: number): Observable<ApiResult<Cocktail[]>> {
+  searchById(id: number): Observable<ApiResult<Cocktail[]>> {
     const url = `${this.apiUrl}/lookup.php?i=${id}`;
-    return this.getDrinks(url);
-  }
-  
-  getRandom(): Observable<ApiResult<Cocktail[]>> {
-    const url = `${this.apiUrl}/random.php`;
     return this.getDrinks(url);
   }
 
   private getDrinks(url: string): Observable<ApiResult<Cocktail[]>> {
     return this.http.get<TheCocktailDBResponse>(url).pipe(
-      map((response) => {
-        const drinks = response?.drinks ?? [];
+      map(response => {
         return {
           success: true,
-          data: drinks,
+          data: response.drinks ?? [],
           error: undefined
         };
       }),
       catchError((error: HttpErrorResponse) => {
-        console.error('Error en la API:', error);
+        console.error('API Error:', error);
         return of({
           success: false,
           data: [],

@@ -8,11 +8,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatDialog } from '@angular/material/dialog';
 import { CocktailService } from '../../services/cocktail.service';
-import { FavoriteService } from '../../services/favorite.service';
 import { Cocktail, ApiResult } from '../../models/cocktail.model';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
+import { FavoriteService } from '../../services/favorite.service';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-cocktail-list',
@@ -26,10 +28,14 @@ import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
     MatMenuModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDialogModule,
+    MatOptionModule,
+    FormsModule,
+    MatSelectModule
   ],
   templateUrl: './cocktail-list.html',
-  styleUrls: ['./cocktail-list.scss'],
+  styleUrls: ['./cocktail-list.scss']
 })
 export class CocktailListComponent implements OnInit {
   cocktails: Cocktail[] = [];
@@ -41,37 +47,92 @@ export class CocktailListComponent implements OnInit {
 
   constructor(
     private cocktailService: CocktailService,
-    private favoriteService: FavoriteService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private favoriteService: FavoriteService
   ) {}
 
   ngOnInit() {
-    this.favoriteService.getFavoritesCount$().subscribe(count => {
-      this.favoritesCount = count;
-    });
+  // Suscripción al conteo
+  this.favoriteService.getFavoritesCount$().subscribe(count => {
+    this.favoritesCount = count;
+  });
+
+  // Suscripción a cambios en la lista de favoritos
+  this.favoriteService.getFavorites$().subscribe(favs => {
+    if (this.showFavorites) {
+      this.cocktails = favs.length > 0 ? favs : [];
+      this.errorMsg = favs.length === 0 ? 'No tienes cócteles favoritos aún.' : null;
+    }
+  });
+}
+
+search(): void {
+  this.errorMsg = null;
+
+  if (!this.query || this.query.trim() === '') {
+    this.errorMsg = 'Debes ingresar un valor de búsqueda.';
+    return;
   }
 
-  search(): void {
-    this.loading = true;
-    this.errorMsg = null;
-    this.cocktails = [];
+  const trimmedQuery = this.query.trim();
 
-    this.cocktailService.searchByName(this.query).subscribe({
-      next: (result: ApiResult<Cocktail[]>) => {
-        const drinks = result.data;
-        if (result.success && Array.isArray(drinks) && drinks.length > 0) {
-          this.cocktails = drinks;
-        } else {
-          this.errorMsg = 'No se encontraron resultados.';
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error en la suscripción:', err);
-        this.errorMsg = 'Error al consultar la API';
-        this.loading = false;
-      },
+  switch (this.searchType) {
+    case 'name':
+      if (trimmedQuery.length > 50) {
+        this.errorMsg = 'El nombre no puede superar los 50 caracteres.';
+        return;
+      }
+      break;
+
+    case 'id':
+      if (!/^\d+$/.test(trimmedQuery)) {
+        this.errorMsg = 'El ID debe ser un número.';
+        return;
+      }
+      break;
+
+    case 'ingredient':
+      if (trimmedQuery.length > 50) {
+        this.errorMsg = 'El ingrediente no puede superar los 50 caracteres.';
+        return;
+      }
+      break;
+  }
+
+  this.loading = true;
+  this.cocktails = [];
+
+  if (this.searchType === 'name') {
+    this.cocktailService.searchByName(trimmedQuery).subscribe({
+      next: result => this.handleResult(result),
+      error: () => this.handleError()
     });
+  } else if (this.searchType === 'id') {
+    this.cocktailService.searchById(+trimmedQuery).subscribe({
+      next: result => this.handleResult(result),
+      error: () => this.handleError()
+    });
+  } else if (this.searchType === 'ingredient') {
+    this.cocktailService.searchByIngredient(trimmedQuery).subscribe({
+      next: result => this.handleResult(result),
+      error: () => this.handleError()
+    });
+  }
+}
+
+
+  handleResult(result: ApiResult<Cocktail[]>) {
+    if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+      this.cocktails = result.data;
+    } else {
+      this.errorMsg = 'No se encontraron resultados.';
+    }
+    this.loading = false;
+  }
+
+  handleError() {
+    this.errorMsg = 'Error al consultar la API.';
+    this.loading = false;
   }
 
   isFavorite(idDrink: string): boolean {
@@ -80,45 +141,48 @@ export class CocktailListComponent implements OnInit {
 
   toggleFavorite(idDrink: string): void {
     const cocktail = this.cocktails.find(c => c.idDrink === idDrink);
-    if (!cocktail) return;
-
-    const nowFav = this.favoriteService.toggleFavorite(cocktail);
-
-    if (this.showFavorites && !nowFav) {
-      this.cocktails = this.cocktails.filter(c => c.idDrink !== idDrink);
-      if (this.cocktails.length === 0) {
-        this.errorMsg = 'No tienes cócteles favoritos aún.';
-      }
+    if (cocktail) {
+      this.favoriteService.toggleFavorite(cocktail);
     }
-
-    console.log(`${cocktail.strDrink} ${nowFav ? 'añadido a' : 'removido de'} favoritos`);
   }
 
   openDetails(cocktail: Cocktail): void {
     this.dialog.open(CocktailDetailComponent, {
       width: '500px',
-      data: { cocktail },
+      data: { cocktail }
     });
   }
 
   toggleView(): void {
     this.showFavorites = !this.showFavorites;
     this.errorMsg = null;
-
+    this.cocktails = [];
     if (this.showFavorites) {
-      this.loadFavorites();
-    } else {
-      this.cocktails = [];
+      const favs = this.favoriteService.getFavorites();
+      if (favs.length > 0) {
+        this.cocktails = favs;
+        this.query="";
+      } else {
+        this.query="";
+        this.cocktails = [];
+        this.errorMsg = 'No tienes cócteles favoritos aún.';
+      }
     }
   }
 
-  private loadFavorites(): void {
-    const favs = this.favoriteService.getFavorites(); // debe devolver Cocktail[]
-    if (favs && favs.length > 0) {
-      this.cocktails = favs;
-    } else {
-      this.cocktails = [];
-      this.errorMsg = 'No tienes cócteles favoritos aún.';
-    }
+  get helpText(): string {
+  switch (this.searchType) {
+    case 'name':
+      return 'Ingresa el nombre del cóctel (máx. 50 caracteres).';
+    case 'id':
+      return 'Ingresa el ID del cóctel (solo números).';
+    case 'ingredient':
+      return 'Ingresa un ingrediente para buscar cócteles que lo contengan (máx. 50 caracteres).';
+    default:
+      return '';
   }
+}
+
+
+  searchType: 'name' | 'id' | 'ingredient' = 'name';
 }

@@ -1,43 +1,56 @@
 <div class="cocktail-container">
-  <!-- Header de acciones -->
-  <div class="action-header">
-    <form (ngSubmit)="search()" class="search-bar" *ngIf="!showFavorites">
-      <mat-form-field appearance="outline" class="search-input">
-        <mat-label>Buscar cóctel</mat-label>
-        <input
-          matInput
-          [(ngModel)]="query"
-          name="query"
-          placeholder="Ej: Margarita"
-          maxlength="50"
-          pattern="^[a-zA-Z ]*$"
-          required
-        />
-      </mat-form-field>
-    </form>
+<div class="action-bar">
+  <!-- Selección del tipo de búsqueda -->
+  <mat-form-field appearance="outline" class="search-type-select" *ngIf="!showFavorites">
+    <mat-label>Buscar por</mat-label>
+    <mat-select [(ngModel)]="searchType" name="searchType">
+      <mat-option value="name">Nombre</mat-option>
+      <mat-option value="id">ID</mat-option>
+      <mat-option value="ingredient">Ingrediente</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-    <!-- Botón de favoritos -->
-    <button
-      mat-stroked-button
-      color="accent"
-      class="favorites-btn"
-      (click)="toggleView()"
-      matBadge="{{ favoritesCount }}"
-      matBadgeColor="warn"
-      matBadgeSize="medium"
-      matBadgeOverlap="false"
-    >
-      <mat-icon>favorite</mat-icon>
-      {{ showFavorites ? 'Ver Todos' : 'Ver Favoritos' }}
+  <!-- Formulario de búsqueda -->
+  <form (ngSubmit)="search()" class="search-bar" *ngIf="!showFavorites">
+    <mat-form-field appearance="outline" class="search-input">
+      <mat-label>Buscar cóctel</mat-label>
+      <input
+        matInput
+        [(ngModel)]="query"
+        name="query"
+        placeholder="Ej: Margarita"
+        maxlength="50"
+        required
+      />
+      <mat-hint>{{ helpText }}</mat-hint>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading || !query">
+      Buscar
     </button>
-  </div>
+  </form>
+
+  <!-- Botón de favoritos / ver todos -->
+  <button
+    mat-stroked-button
+    color="accent"
+    (click)="toggleView()"
+    matBadge="{{ favoritesCount }}"
+    matBadgeColor="warn"
+    matBadgeSize="large"
+    matBadgeOverlap="false"
+  >
+    <mat-icon>favorite</mat-icon>
+    {{ showFavorites ? 'Ver Todos' : 'Ver Favoritos' }}
+  </button>
+</div>
 
   <!-- Spinner -->
   <div class="spinner" *ngIf="loading">
-    <mat-spinner diameter="40"></mat-spinner>
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
   </div>
 
-  <!-- Error o mensaje vacío -->
+  <!-- Mensaje de error o vacío -->
   <div *ngIf="errorMsg && !loading" class="error-message">
     {{ errorMsg }}
   </div>
@@ -63,7 +76,12 @@
           </button>
         </mat-menu>
       </div>
-      <img mat-card-image [src]="cocktail.strDrinkThumb" [alt]="cocktail.strDrink" loading="lazy" />
+      <img
+        mat-card-image
+        [src]="cocktail.strDrinkThumb"
+        [alt]="cocktail.strDrink"
+        loading="lazy"
+      />
       <mat-card-content>
         <p>ID: {{ cocktail.idDrink }}</p>
       </mat-card-content>
