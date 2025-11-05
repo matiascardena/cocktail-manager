@@ -9,6 +9,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { CocktailService } from '../../services/cocktail.service';
 import { Cocktail, ApiResult } from '../../models/cocktail.model';
+import { MatDialog } from '@angular/material/dialog';
+import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
 
 @Component({
   selector: 'app-cocktail-list',
@@ -33,7 +35,7 @@ export class CocktailListComponent implements OnInit {
   errorMsg: string | null = null;
   favorites = new Set<string>();
 
-  constructor(private cocktailService: CocktailService) {}
+ constructor(private cocktailService: CocktailService, private dialog: MatDialog) {}
 
   ngOnInit() {}
 
@@ -73,6 +75,9 @@ export class CocktailListComponent implements OnInit {
   }
 
   openDetails(cocktail: Cocktail): void {
-    console.log('Abrir detalles para:', cocktail.strDrink);
+    this.dialog.open(CocktailDetailComponent, {
+      width: '500px',
+      data: { cocktail },
+    });
   }
 }

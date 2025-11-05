@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>{{ data.cocktail.strDrink }}</h2>
+
+<div mat-dialog-content class="detail-container">
+  <img [src]="data.cocktail.strDrinkThumb" [alt]="data.cocktail.strDrink" class="detail-image" />
+
+  <div class="detail-info">
+    <h3>Ingredientes</h3>
+    <ul>
+      <li *ngFor="let ingredient of getIngredients()">
+        {{ ingredient.name }} — {{ ingredient.measure }}
+      </li>
+    </ul>
+
+    <h3>Preparación</h3>
+    <p>{{ data.cocktail.strInstructions }}</p>
+  </div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</div>
