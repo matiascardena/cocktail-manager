@@ -1,0 +1,27 @@
+<div class="search-bar">
+  <mat-form-field appearance="outline" class="input">
+    <mat-label>Buscar cóctel por nombre</mat-label>
+    <input matInput [(ngModel)]="query" maxlength="50" />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="search()">Buscar</button>
+</div>
+
+<div *ngIf="loading" class="loading">
+  <mat-spinner></mat-spinner>
+</div>
+
+<div class="cards" *ngIf="!loading && cocktails.length; else noResults">
+  <mat-card *ngFor="let c of cocktails" class="card">
+    <img mat-card-image [src]="c.strDrinkThumb" alt="{{ c.strDrink }}" />
+    <mat-card-content>
+      <h3>{{ c.strDrink }}</h3>
+      <p><strong>ID:</strong> {{ c.idDrink }}</p>
+      <p *ngIf="c.strCategory">{{ c.strCategory }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #noResults>
+  <p *ngIf="!loading && !cocktails.length">No se encontraron cócteles.</p>
+</ng-template>
