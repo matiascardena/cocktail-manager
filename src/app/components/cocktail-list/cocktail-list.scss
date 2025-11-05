@@ -72,7 +72,7 @@ button[mat-stroked-button] {
 ========================= */
 .cocktail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(20% - 1rem),1fr));
   gap: 1rem;
 }
 
