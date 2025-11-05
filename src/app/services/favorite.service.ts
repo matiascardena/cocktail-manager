@@ -6,14 +6,21 @@ import { Cocktail } from '../models/cocktail.model';
   providedIn: 'root'
 })
 export class FavoriteService {
-  private readonly STORAGE_KEY = 'favorites';
+  readonly STORAGE_KEY = 'favorites';
   private favorites: Cocktail[] = [];
-
-  // Observables para count y lista
   private favoritesCount$ = new BehaviorSubject<number>(0);
   private favorites$ = new BehaviorSubject<Cocktail[]>([]);
 
   constructor() {
+    this.loadFavorites();
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.STORAGE_KEY) {
+        this.reloadFavoritesFromStorage();
+      }
+    });
+  }
+
+  reloadFavoritesFromStorage() {
     this.loadFavorites();
   }
 
