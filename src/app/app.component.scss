@@ -1,0 +1,15 @@
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.content {
+  padding: 16px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}

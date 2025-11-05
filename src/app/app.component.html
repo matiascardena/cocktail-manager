@@ -1,0 +1,18 @@
+
+<mat-toolbar color="primary" class="toolbar">
+  Cocktail Manager
+</mat-toolbar>
+
+<div class="content">
+  <div class="cards">
+    <mat-card *ngFor="let i of [1,2,3,4,5,6,7,8,9]">
+      <mat-card-header>
+        <mat-card-title>Cóctel {{ i }}</mat-card-title>
+        <mat-card-subtitle>Prueba de layout responsive</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Contenido de prueba para verificar el grid y breakpoints.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
