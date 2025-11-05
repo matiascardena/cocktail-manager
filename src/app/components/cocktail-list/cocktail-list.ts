@@ -64,7 +64,7 @@ export class CocktailListComponent implements OnInit {
 
   constructor(
     private cocktailService: CocktailService,
-    private dialog: MatDialog,
+    public dialog: MatDialog,
     private favoriteService: FavoriteService
   ) {}
 

@@ -1,23 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { CocktailDetailComponent } from './cocktail-detail';
+import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { CocktailDetail } from './cocktail-detail';
-
-describe('CocktailDetail', () => {
-  let component: CocktailDetail;
-  let fixture: ComponentFixture<CocktailDetail>;
+describe('CocktailDetailComponent', () => {
+  let component: CocktailDetailComponent;
+  let fixture: any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CocktailDetail]
-    })
-    .compileComponents();
+      imports: [CocktailDetailComponent, MatDialogModule],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: { cocktail: { name: 'Mojito' } } }
+      ]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(CocktailDetail);
+    fixture = TestBed.createComponent(CocktailDetailComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
 });
