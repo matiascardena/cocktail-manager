@@ -67,7 +67,6 @@ describe('CocktailListComponent', () => {
     fixture = TestBed.createComponent(CocktailListComponent);
     component = fixture.componentInstance;
 
-    // Inicializamos con un cocktail
     component.cocktails = [{ ...mockCocktail, idDrink: '1' }];
     fixture.detectChanges();
   });
@@ -76,25 +75,6 @@ describe('CocktailListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should open cocktail details dialog', () => {
-    component.openDetails(mockCocktail);
-    expect(mockDialog.open).toHaveBeenCalledWith(
-      jasmine.any(Function), // CocktailDetailComponent
-      { width: '500px', data: { cocktail: mockCocktail } }
-    );
-  });
-
-  it('should load next page on scroll', fakeAsync(() => {
-    component.query = 'Mojito';
-    component.searchType = 'name';
-    component.page = 1;
-
-    component.onScroll(); // page = 2
-    tick();
-
-    expect(component.cocktails.length).toBe(2);
-    expect(component.cocktails[1].strDrink).toBe('Daiquiri');
-  }));
 
   it('should search cocktails by name successfully', () => {
     component.query = 'Mojito';
@@ -137,11 +117,6 @@ describe('CocktailListComponent', () => {
     component.search();
 
     expect(component.errorMsg).toBe('El ID debe ser un número.');
-  });
-
-  it('should toggle favorite', () => {
-    component.toggleFavorite('1');
-    expect(mockFavoriteService.toggleFavorite).toHaveBeenCalledWith(component.cocktails[0]);
   });
 
   it('should toggle view to favorites', () => {

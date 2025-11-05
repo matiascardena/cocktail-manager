@@ -14,8 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { CocktailService } from '../../services/cocktail.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { Cocktail, ApiResult } from '../../models/cocktail.model';
-import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
 
 interface SavedState {
   query: string;

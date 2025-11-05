@@ -1,14 +1,17 @@
+// cocktail-detail.component.spec.ts
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { MatDialog, MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { CocktailDetailComponent } from './cocktail-detail';
 import { FavoriteService } from '../../services/favorite.service';
 import { Cocktail } from '../../models/cocktail.model';
-import { CocktailListComponent } from '../cocktail-list/cocktail-list';
 
-// Mock data completo de Cocktail
-const mockCocktails: Cocktail[] = [
-  {
+describe('CocktailDetailComponent', () => {
+  let component: CocktailDetailComponent;
+  let fixture: ComponentFixture<CocktailDetailComponent>;
+  let mockFavoriteService: jasmine.SpyObj<FavoriteService>;
+
+  // Cocktail con 15 ingredientes
+  const mockCocktail: Cocktail = {
     idDrink: '1',
     strDrink: 'Margarita',
     strDrinkThumb: 'thumb1.jpg',
@@ -16,94 +19,76 @@ const mockCocktails: Cocktail[] = [
     strAlcoholic: 'Alcoholic',
     strGlass: 'Cocktail glass',
     strInstructions: 'Mix ingredients',
-  },
-  {
-    idDrink: '2',
-    strDrink: 'Mojito',
-    strDrinkThumb: 'thumb2.jpg',
-    strCategory: 'Cocktail',
-    strAlcoholic: 'Alcoholic',
-    strGlass: 'Highball glass',
-    strInstructions: 'Mix ingredients',
-  },
-];
+  } as any;
 
-describe('CocktailListComponent', () => {
-  let component: CocktailListComponent;
-  let fixture: ComponentFixture<CocktailListComponent>;
-  let dialog: MatDialog;
-  let mockFavoriteService: jasmine.SpyObj<FavoriteService>;
+  // Añadimos 15 ingredientes y medidas
+  for (let i = 1; i <= 15; i++) {
+    mockCocktail[`strIngredient${i}` as keyof Cocktail] = `Ingredient${i}`;
+    mockCocktail[`strMeasure${i}` as keyof Cocktail] = `${i * 10}ml`;
+  }
 
   beforeEach(async () => {
-    mockFavoriteService = jasmine.createSpyObj('FavoriteService', ['getFavorites', 'getFavorites$', 'getFavoritesCount$', 'isFavorite', 'toggleFavorite']);
-
-    // Observables simulados
-    mockFavoriteService.getFavorites$ = jasmine.createSpy().and.returnValue(of([]));
-    mockFavoriteService.getFavoritesCount$ = jasmine.createSpy().and.returnValue(of(0));
+    mockFavoriteService = jasmine.createSpyObj('FavoriteService', ['isFavorite', 'toggleFavorite']);
     mockFavoriteService.isFavorite.and.returnValue(false);
-    mockFavoriteService.getFavorites.and.returnValue([]);
 
     await TestBed.configureTestingModule({
-      imports: [CocktailListComponent, HttpClientTestingModule, MatDialogModule],
+      imports: [CocktailDetailComponent, MatDialogModule],
       providers: [
         { provide: FavoriteService, useValue: mockFavoriteService },
-        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
-        { provide: MAT_DIALOG_DATA, useValue: {} }
-      ]
+        { provide: MAT_DIALOG_DATA, useValue: { cocktail: mockCocktail } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CocktailListComponent);
+    fixture = TestBed.createComponent(CocktailDetailComponent);
     component = fixture.componentInstance;
-    dialog = TestBed.inject(MatDialog);
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should toggle favorite', () => {
-    component.cocktails = [...mockCocktails];
-    component.toggleFavorite('1');
-    expect(mockFavoriteService.toggleFavorite).toHaveBeenCalledWith(mockCocktails[0]);
-  });
-
-  it('should open dialog on openDetails', () => {
-    spyOn(dialog, 'open').and.returnValue({ afterClosed: () => of(null) } as any);
-    component.openDetails(mockCocktails[0]);
-    expect(dialog.open).toHaveBeenCalled();
-  });
-
-  it('should load next page on scroll', fakeAsync(() => {
-    const mockService = TestBed.inject(FavoriteService);
-    // Simulamos el método de carga de Cocktails en el service
-    spyOn((component as any).cocktailService, 'searchByName').and.returnValue(of(mockCocktails));
-    component.query = 'Margarita';
-    component.searchType = 'name';
-    component.onScroll();
-    tick();
-    expect(component.cocktails.length).toBe(mockCocktails.length);
+  it('should load cocktail data on init', fakeAsync(() => {
+    component.ngOnInit();
+    tick(300);
+    expect(component.cocktailData).toEqual(mockCocktail);
+    expect(component.loading).toBeFalse();
   }));
 
-  it('should set errorMsg when search query is empty', () => {
-    component.query = '';
-    component.search();
-    expect(component.errorMsg).toBe('Debes ingresar un valor de búsqueda.');
+  it('should return all 15 ingredients correctly', fakeAsync(() => {
+    component.ngOnInit();
+    tick(300);
+    const ingredients = component.getIngredients();
+    expect(ingredients.length).toBe(15);
+    ingredients.forEach((ing, index) => {
+      expect(ing).toEqual({ name: `Ingredient${index + 1}`, measure: `${(index + 1) * 10}ml` });
+    });
+  }));
+
+  it('should return empty array if cocktailData is undefined', () => {
+    component.cocktailData = undefined as any;
+    const ingredients = component.getIngredients();
+    expect(ingredients).toEqual([]);
   });
 
-  it('should reset query when searchType changes', () => {
-    component.query = 'Test';
-    component.onSearchTypeChange('ingredient');
-    expect(component.query).toBe('');
-    expect(component.searchType).toBe('ingredient');
+  it('should set imageLoaded to true on onImageLoad', () => {
+    expect(component.imageLoaded).toBeFalse();
+    component.onImageLoad();
+    expect(component.imageLoaded).toBeTrue();
   });
 
-  it('should display helpText according to searchType', () => {
-    component.searchType = 'name';
-    expect(component.helpText).toBe('Máx. 50 caracteres.');
-    component.searchType = 'id';
-    expect(component.helpText).toBe('Solo números.');
-    component.searchType = 'ingredient';
-    expect(component.helpText).toBe('Máx. 50 caracteres.');
-  });
+  it('should call favoriteService.isFavorite in isFavorite', fakeAsync(() => {
+    component.ngOnInit();
+    tick(300);
+    const result = component.isFavorite();
+    expect(mockFavoriteService.isFavorite).toHaveBeenCalledWith(mockCocktail.idDrink);
+    expect(result).toBeFalse();
+  }));
+
+  it('should call favoriteService.toggleFavorite in toggleFavorite', fakeAsync(() => {
+    component.ngOnInit();
+    tick(300);
+    component.toggleFavorite();
+    expect(mockFavoriteService.toggleFavorite).toHaveBeenCalledWith(mockCocktail);
+  }));
 });
