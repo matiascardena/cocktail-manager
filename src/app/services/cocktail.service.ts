@@ -2,71 +2,58 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { Cocktail, CocktailApiResponse, ApiResult } from '../models/cocktail.model';
+import { ApiResult, Cocktail } from '../models/cocktail.model';
 
-@Injectable({ providedIn: 'root' })
+interface TheCocktailDBResponse {
+  drinks: Cocktail[] | null;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class CocktailService {
-  private readonly API_URL = 'https://www.thecocktaildb.com/api/json/v1/1/';
+  private apiUrl = 'https://www.thecocktaildb.com/api/json/v1/1';
 
   constructor(private http: HttpClient) {}
 
   searchByName(name: string): Observable<ApiResult<Cocktail[]>> {
-    return this.http
-      .get<CocktailApiResponse>(`${this.API_URL}search.php?s=${name}`)
-      .pipe(
-        map(res => ({
-          data: res.drinks || [],
-          success: true,
-          status: 200
-        })),
-        catchError((err: HttpErrorResponse) =>
-          of({
-            data: null,
-            success: false,
-            error: err.message,
-            status: err.status
-          })
-        )
-      );
+    const url = `${this.apiUrl}/search.php?s=${name}`;
+    return this.getDrinks(url);
   }
 
   searchByIngredient(ingredient: string): Observable<ApiResult<Cocktail[]>> {
-    return this.http
-      .get<CocktailApiResponse>(`${this.API_URL}filter.php?i=${ingredient}`)
-      .pipe(
-        map(res => ({
-          data: res.drinks || [],
-          success: true,
-          status: 200
-        })),
-        catchError((err: HttpErrorResponse) =>
-          of({
-            data: null,
-            success: false,
-            error: err.message,
-            status: err.status
-          })
-        )
-      );
+    const url = `${this.apiUrl}/filter.php?i=${ingredient}`;
+    return this.getDrinks(url);
   }
 
   getById(id: number): Observable<ApiResult<Cocktail[]>> {
-    return this.http
-      .get<CocktailApiResponse>(`${this.API_URL}lookup.php?i=${id}`)
-      .pipe(
-        map(res => ({
-          data: res.drinks || [],
+    const url = `${this.apiUrl}/lookup.php?i=${id}`;
+    return this.getDrinks(url);
+  }
+  
+  getRandom(): Observable<ApiResult<Cocktail[]>> {
+    const url = `${this.apiUrl}/random.php`;
+    return this.getDrinks(url);
+  }
+
+  private getDrinks(url: string): Observable<ApiResult<Cocktail[]>> {
+    return this.http.get<TheCocktailDBResponse>(url).pipe(
+      map((response) => {
+        const drinks = response?.drinks ?? [];
+        return {
           success: true,
-          status: 200
-        })),
-        catchError((err: HttpErrorResponse) =>
-          of({
-            data: null,
-            success: false,
-            error: err.message,
-            status: err.status
-          })
-        )
-      );
+          data: drinks,
+          error: undefined
+        };
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error en la API:', error);
+        return of({
+          success: false,
+          data: [],
+          error: error.message || 'Error desconocido'
+        });
+      })
+    );
   }
 }

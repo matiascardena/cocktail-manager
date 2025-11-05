@@ -5,6 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
 import { CocktailService } from '../../services/cocktail.service';
 import { Cocktail, ApiResult } from '../../models/cocktail.model';
 
@@ -17,16 +19,19 @@ import { Cocktail, ApiResult } from '../../models/cocktail.model';
     MatCardModule,
     MatInputModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatMenuModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './cocktail-list.html',
-  styleUrls: ['./cocktail-list.scss']
+  styleUrls: ['./cocktail-list.scss'],
 })
 export class CocktailListComponent implements OnInit {
   cocktails: Cocktail[] = [];
   loading = false;
   query = '';
   errorMsg: string | null = null;
+  favorites = new Set<string>();
 
   constructor(private cocktailService: CocktailService) {}
 
@@ -35,23 +40,39 @@ export class CocktailListComponent implements OnInit {
   search(): void {
     this.loading = true;
     this.errorMsg = null;
+    this.cocktails = [];
 
     this.cocktailService.searchByName(this.query).subscribe({
       next: (result: ApiResult<Cocktail[]>) => {
-        if (result.success && result.data) {
-          this.cocktails = result.data;
+        const drinks = result.data;
+        if (result.success && Array.isArray(drinks) && drinks.length > 0) {
+          this.cocktails = drinks;
         } else {
-          this.cocktails = [];
-          this.errorMsg = result.error || 'No se encontraron resultados.';
+          this.errorMsg = 'No se encontraron resultados.';
         }
         this.loading = false;
       },
       error: (err) => {
         console.error('Error en la suscripción:', err);
-        this.cocktails = [];
         this.errorMsg = 'Error al consultar la API';
         this.loading = false;
-      }
+      },
     });
+  }
+
+  toggleFavorite(idDrink: string): void {
+    if (this.favorites.has(idDrink)) {
+      this.favorites.delete(idDrink);
+    } else {
+      this.favorites.add(idDrink);
+    }
+  }
+
+  isFavorite(idDrink: string): boolean {
+    return this.favorites.has(idDrink);
+  }
+
+  openDetails(cocktail: Cocktail): void {
+    console.log('Abrir detalles para:', cocktail.strDrink);
   }
 }

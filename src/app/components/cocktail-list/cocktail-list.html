@@ -1,27 +1,62 @@
-<div class="search-bar">
-  <mat-form-field appearance="outline" class="input">
-    <mat-label>Buscar cóctel por nombre</mat-label>
-    <input matInput [(ngModel)]="query" maxlength="50" />
-  </mat-form-field>
+<div class="cocktail-container">
+  <!-- Barra de búsqueda -->
+  <form (ngSubmit)="search()" class="search-bar">
+    <mat-form-field appearance="outline" class="search-input">
+      <mat-label>Buscar cóctel</mat-label>
+      <input
+        matInput
+        [(ngModel)]="query"
+        name="query"
+        placeholder="Ej: Margarita"
+        maxlength="50"
+        pattern="^[a-zA-Z ]*$"
+        required
+      />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading || !query">
+      Buscar
+    </button>
+  </form>
 
-  <button mat-raised-button color="primary" (click)="search()">Buscar</button>
+  <!-- Spinner -->
+  <div class="spinner" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Error o mensaje vacío -->
+  <div *ngIf="errorMsg && !loading" class="error-message">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Grid de cócteles -->
+  <div class="grid" *ngIf="!loading && cocktails.length > 0">
+    <mat-card *ngFor="let cocktail of cocktails" class="cocktail-card">
+      <div class="card-header">
+        <mat-card-title>{{ cocktail.strDrink }}</mat-card-title>
+
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="openDetails(cocktail)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalles</span>
+          </button>
+          <button mat-menu-item (click)="toggleFavorite(cocktail.idDrink)">
+            <mat-icon color="warn">
+              {{ isFavorite(cocktail.idDrink) ? 'favorite' : 'favorite_border' }}
+            </mat-icon>
+            <span>{{ isFavorite(cocktail.idDrink) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <img mat-card-image [src]="cocktail.strDrinkThumb" [alt]="cocktail.strDrink" />
+
+      <mat-card-content>
+        <p>ID: {{ cocktail.idDrink }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
-
-<div *ngIf="loading" class="loading">
-  <mat-spinner></mat-spinner>
-</div>
-
-<div class="cards" *ngIf="!loading && cocktails.length; else noResults">
-  <mat-card *ngFor="let c of cocktails" class="card">
-    <img mat-card-image [src]="c.strDrinkThumb" alt="{{ c.strDrink }}" />
-    <mat-card-content>
-      <h3>{{ c.strDrink }}</h3>
-      <p><strong>ID:</strong> {{ c.idDrink }}</p>
-      <p *ngIf="c.strCategory">{{ c.strCategory }}</p>
-    </mat-card-content>
-  </mat-card>
-</div>
-
-<ng-template #noResults>
-  <p *ngIf="!loading && !cocktails.length">No se encontraron cócteles.</p>
-</ng-template>
