@@ -1,22 +1,36 @@
 <div class="cocktail-container">
-  <!-- Barra de búsqueda -->
-  <form (ngSubmit)="search()" class="search-bar">
-    <mat-form-field appearance="outline" class="search-input">
-      <mat-label>Buscar cóctel</mat-label>
-      <input
-        matInput
-        [(ngModel)]="query"
-        name="query"
-        placeholder="Ej: Margarita"
-        maxlength="50"
-        pattern="^[a-zA-Z ]*$"
-        required
-      />
-    </mat-form-field>
-    <button mat-raised-button color="primary" type="submit" [disabled]="loading || !query">
-      Buscar
+  <!-- Header de acciones -->
+  <div class="action-header">
+    <form (ngSubmit)="search()" class="search-bar" *ngIf="!showFavorites">
+      <mat-form-field appearance="outline" class="search-input">
+        <mat-label>Buscar cóctel</mat-label>
+        <input
+          matInput
+          [(ngModel)]="query"
+          name="query"
+          placeholder="Ej: Margarita"
+          maxlength="50"
+          pattern="^[a-zA-Z ]*$"
+          required
+        />
+      </mat-form-field>
+    </form>
+
+    <!-- Botón de favoritos -->
+    <button
+      mat-stroked-button
+      color="accent"
+      class="favorites-btn"
+      (click)="toggleView()"
+      matBadge="{{ favoritesCount }}"
+      matBadgeColor="warn"
+      matBadgeSize="medium"
+      matBadgeOverlap="false"
+    >
+      <mat-icon>favorite</mat-icon>
+      {{ showFavorites ? 'Ver Todos' : 'Ver Favoritos' }}
     </button>
-  </form>
+  </div>
 
   <!-- Spinner -->
   <div class="spinner" *ngIf="loading">
@@ -28,16 +42,14 @@
     {{ errorMsg }}
   </div>
 
-  <!-- Grid de cócteles -->
-  <div class="grid" *ngIf="!loading && cocktails.length > 0">
+  <!-- Grilla de cócteles -->
+  <div class="cocktail-grid" *ngIf="!loading && cocktails.length > 0">
     <mat-card *ngFor="let cocktail of cocktails" class="cocktail-card">
       <div class="card-header">
         <mat-card-title>{{ cocktail.strDrink }}</mat-card-title>
-
         <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>
-
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="openDetails(cocktail)">
             <mat-icon>visibility</mat-icon>
@@ -51,9 +63,7 @@
           </button>
         </mat-menu>
       </div>
-
-      <img mat-card-image [src]="cocktail.strDrinkThumb" [alt]="cocktail.strDrink" />
-
+      <img mat-card-image [src]="cocktail.strDrinkThumb" [alt]="cocktail.strDrink" loading="lazy" />
       <mat-card-content>
         <p>ID: {{ cocktail.idDrink }}</p>
       </mat-card-content>

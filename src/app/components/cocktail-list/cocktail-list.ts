@@ -7,9 +7,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
-import { CocktailService } from '../../services/cocktail.service';
-import { Cocktail, ApiResult } from '../../models/cocktail.model';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialog } from '@angular/material/dialog';
+import { CocktailService } from '../../services/cocktail.service';
+import { FavoriteService } from '../../services/favorite.service';
+import { Cocktail, ApiResult } from '../../models/cocktail.model';
 import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
 
 @Component({
@@ -24,6 +26,7 @@ import { CocktailDetailComponent } from '../cocktail-detail/cocktail-detail';
     MatMenuModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatBadgeModule
   ],
   templateUrl: './cocktail-list.html',
   styleUrls: ['./cocktail-list.scss'],
@@ -33,11 +36,20 @@ export class CocktailListComponent implements OnInit {
   loading = false;
   query = '';
   errorMsg: string | null = null;
-  favorites = new Set<string>();
+  showFavorites = false;
+  favoritesCount = 0;
 
- constructor(private cocktailService: CocktailService, private dialog: MatDialog) {}
+  constructor(
+    private cocktailService: CocktailService,
+    private favoriteService: FavoriteService,
+    private dialog: MatDialog
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.favoriteService.getFavoritesCount$().subscribe(count => {
+      this.favoritesCount = count;
+    });
+  }
 
   search(): void {
     this.loading = true;
@@ -62,16 +74,24 @@ export class CocktailListComponent implements OnInit {
     });
   }
 
-  toggleFavorite(idDrink: string): void {
-    if (this.favorites.has(idDrink)) {
-      this.favorites.delete(idDrink);
-    } else {
-      this.favorites.add(idDrink);
-    }
+  isFavorite(idDrink: string): boolean {
+    return this.favoriteService.isFavorite(idDrink);
   }
 
-  isFavorite(idDrink: string): boolean {
-    return this.favorites.has(idDrink);
+  toggleFavorite(idDrink: string): void {
+    const cocktail = this.cocktails.find(c => c.idDrink === idDrink);
+    if (!cocktail) return;
+
+    const nowFav = this.favoriteService.toggleFavorite(cocktail);
+
+    if (this.showFavorites && !nowFav) {
+      this.cocktails = this.cocktails.filter(c => c.idDrink !== idDrink);
+      if (this.cocktails.length === 0) {
+        this.errorMsg = 'No tienes cócteles favoritos aún.';
+      }
+    }
+
+    console.log(`${cocktail.strDrink} ${nowFav ? 'añadido a' : 'removido de'} favoritos`);
   }
 
   openDetails(cocktail: Cocktail): void {
@@ -79,5 +99,26 @@ export class CocktailListComponent implements OnInit {
       width: '500px',
       data: { cocktail },
     });
+  }
+
+  toggleView(): void {
+    this.showFavorites = !this.showFavorites;
+    this.errorMsg = null;
+
+    if (this.showFavorites) {
+      this.loadFavorites();
+    } else {
+      this.cocktails = [];
+    }
+  }
+
+  private loadFavorites(): void {
+    const favs = this.favoriteService.getFavorites(); // debe devolver Cocktail[]
+    if (favs && favs.length > 0) {
+      this.cocktails = favs;
+    } else {
+      this.cocktails = [];
+      this.errorMsg = 'No tienes cócteles favoritos aún.';
+    }
   }
 }

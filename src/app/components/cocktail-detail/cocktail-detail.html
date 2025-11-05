@@ -1,19 +1,48 @@
-<h2 mat-dialog-title>{{ data.cocktail.strDrink }}</h2>
+<h2 mat-dialog-title>
+  <ng-container *ngIf="!loading">{{ cocktailData.strDrink }}</ng-container>
+  <ng-container *ngIf="loading">Cargando...</ng-container>
+    <!-- Botón favorito -->
+  <button mat-icon-button color="warn" (click)="toggleFavorite()">
+    <mat-icon>{{ isFavorite(cocktailData.idDrink) ? 'favorite' : 'favorite_border' }}</mat-icon>
+  </button>
+
+</h2>
 
 <div mat-dialog-content class="detail-container">
-  <img [src]="data.cocktail.strDrinkThumb" [alt]="data.cocktail.strDrink" class="detail-image" />
-
-  <div class="detail-info">
-    <h3>Ingredientes</h3>
-    <ul>
-      <li *ngFor="let ingredient of getIngredients()">
-        {{ ingredient.name }} — {{ ingredient.measure }}
-      </li>
-    </ul>
-
-    <h3>Preparación</h3>
-    <p>{{ data.cocktail.strInstructions }}</p>
+  <div *ngIf="loading" class="spinner-container">
+    <mat-spinner diameter="50"></mat-spinner>
   </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="image-wrapper">
+  <mat-spinner *ngIf="!imageLoaded" diameter="40"></mat-spinner>
+  <img 
+    [src]="cocktailData.strDrinkThumb" 
+    [alt]="cocktailData.strDrink" 
+    class="detail-image" 
+    loading="lazy"
+    (load)="onImageLoad()"
+    [hidden]="!imageLoaded"
+  />
+</div>
+
+    <div class="detail-info">
+      <h3>Ingredientes</h3>
+      <ng-container *ngIf="getIngredients().length > 0; else noIngredients">
+        <ul>
+          <li *ngFor="let ingredient of getIngredients()">
+            {{ ingredient.name }} — {{ ingredient.measure || 'Cantidad no especificada' }}
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noIngredients>
+        <p class="no-ingredients">No hay ingredientes disponibles para este cóctel.</p>
+      </ng-template>
+
+      <h3>Preparación</h3>
+      <p>{{ cocktailData.strInstructions }}</p>
+    </div>
+  </ng-container>
 </div>
 
 <div mat-dialog-actions align="end">
