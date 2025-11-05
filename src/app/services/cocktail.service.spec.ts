@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CocktailService } from './cocktail.service';
 import { Cocktail } from '../models/cocktail.model';
 
@@ -9,8 +9,8 @@ describe('CocktailService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [CocktailService],
+        imports: [HttpClientTestingModule],
+      providers: [CocktailService, provideHttpClientTesting()],
     });
     service = TestBed.inject(CocktailService);
     httpMock = TestBed.inject(HttpTestingController);
