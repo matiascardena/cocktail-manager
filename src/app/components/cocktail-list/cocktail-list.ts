@@ -217,21 +217,39 @@ export class CocktailListComponent implements OnInit {
     });
   }
 
-  toggleView(): void {
-    this.showFavorites = !this.showFavorites;
-    this.errorMsg = null;
-    this.cocktails = [];
-    this.query = '';
-    if (this.showFavorites) {
-      const favs = this.favoriteService.getFavorites();
-      if (favs.length > 0) {
-        this.cocktails = favs;
-      } else {
-        this.cocktails = [];
-        this.errorMsg = 'No tienes cócteles favoritos aún.';
-      }
+ toggleView(): void {
+  if (!this.showFavorites) {
+    this.saveState();
+  }
+
+  this.showFavorites = !this.showFavorites;
+  this.errorMsg = null;
+  this.cocktails = [];
+  this.query='';
+  
+  if (this.showFavorites) {
+    
+    const favs = this.favoriteService.getFavorites();
+    if (favs.length > 0) {
+      this.cocktails = favs;
+    } else {
+      this.errorMsg = 'No tienes cócteles favoritos aún.';
+    }
+  } else {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      const state: SavedState = JSON.parse(saved);
+      this.query = state.query;
+      this.searchType = state.searchType;
+      this.page = state.page;
+      this.cocktails = state.cocktails || [];
+      this.allLoaded = false;
+
+      setTimeout(() => window.scrollTo(0, state.scrollY || 0), 0);
     }
   }
+}
+
 
   get helpText(): string {
     switch (this.searchType) {

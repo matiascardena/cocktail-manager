@@ -1,6 +1,35 @@
 # CocktailManager
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+# Description
+
+**CocktailManager** is an Angular 20 [Angular CLI](https://github.com/angular/angular-cli) 
+Application that allows users to search, view, and manage cocktails using the public [TheCocktailDB](https://www.thecocktaildb.com/) API.  
+It supports searching by name, ingredient, or ID, viewing cocktail details, managing favorites, and gracefully handling loading and error states.
+
+---
+
+## Main Features
+
+-  **Dynamic search** by cocktail name, ingredient, or ID  
+-  **Favorites management** via `FavoriteService` using local storage  
+-  **RetryInterceptor** to automatically retry HTTP 500 errors  
+-  **Modern UI** built with Angular Material and standalone components  
+-  **Unit testing** using Karma + Jasmine with >60% coverage  
+-  **Docker support** for easy setup and reproducible environments  
+
+---
+
+## Technologies Used
+
+- Framework Angular 20 
+- Language  TypeScript 
+- UI Library Angular Material
+- Testing Karma + Jasmine
+- HTTP HttpClient + RetryInterceptor
+- Reactive Programming  RxJS
+- Build Tool Webpack (Angular CLI)
+
+---
 
 ## Development server
 
@@ -12,47 +41,17 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-## Code scaffolding
+## Running tests
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To execute tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
 
 ```bash
 ng test
 ```
+- Code coverage: 80%
+- Coverage Report (Karma): /coverage/cocktail-manager/index.html
+- Details Tesitn Karma: DetailTestingKarma.pdf
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
 ## Additional Resources
 
